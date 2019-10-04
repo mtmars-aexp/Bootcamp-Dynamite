@@ -3,156 +3,128 @@ package training.dynamite;
 import com.softwire.dynamite.bot.Bot;
 import com.softwire.dynamite.game.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class MyBot implements Bot {
 
     int dynamiteThrownByTwoSixteen = 0;
     int dynamiteThrownByOpponent = 0;
-    int rock_vibeCheck = 0;
-    int scissors_vibeCheck = 0;
-    int paper_vibeCheck = 0;
-    int dynamite_vibeCheck = 0;
-    Move opponentAlwaysThrows = null;
-    Move counterWith = null;
-    boolean countering = false;
-    int strategyCheckPhase = 0;
-    int deceptionPhase = 0;
-    int deceptionChoice = 0;
-    Random aynRand = new Random();
     int round = 0;
+    boolean drawSuspicion = false;
+    HashMap<Move, Move> counters = new HashMap<>();
+
 
     public MyBot() {
 
+        //Define counters.
+        counters.put(Move.R, Move.P); //Rock is countered by paper.
+        counters.put(Move.P, Move.S); //Paper is counter by scissors.
+        counters.put(Move.S, Move.R); //Scissors is beat by rock.
+        counters.put(Move.D, Move.W); //Dynamite is beat by water balloon.
+        counters.put(Move.W, Move.S); //Water balloon is beat by everything except dynamite.
 
-        System.out.println("Unit 0216 online.");
+        System.out.println("Unit 0216 online. Beep boop.");
     }
 
     @Override
     public Move makeMove(Gamestate gamestate) {
 
-        round ++;
-
+        round++;
         List<Round> previousRounds = gamestate.getRounds();
 
-
-
-
-        //Checks if dynamite was thrown by the opponent in the last round.
         try{
-            //System.out.println("Last round, 0216 threw: " + previousRounds.get(previousRounds.size() - 1).getP1() + " and the opponent threw: " + previousRounds.get(previousRounds.size() - 1).getP2());
-
-            if (previousRounds.get(previousRounds.size() - 1).getP2().equals(Move.D)){
-                dynamiteThrownByOpponent++;
+            if(previousRounds.get(previousRounds.size()-1).getP2().equals(Move.D)){
+                dynamiteThrownByOpponent ++;
             }
         } catch (Exception e) {
-            //Array too smol.
+            //List too smol.
         }
 
-        //Check for brute-force strategies at round 10 and 110.
-        if(previousRounds.size() == 10 || previousRounds.size() == 111){
 
-            strategyCheckPhase++;
-            rock_vibeCheck = 0;
-            paper_vibeCheck = 0;
-            scissors_vibeCheck = 0;
-            dynamite_vibeCheck = 0;
+        if(round < 10){ //Gather information for the first 10 rounds.
+            return moveRandomly(dynamiteThrownByTwoSixteen); //Move erratically as there is insufficient data for meaningful choices.
 
-            //Check the last 10 rounds for signs of repetition.
-            for (int i = previousRounds.size()-10; i != previousRounds.size(); i++){
-                if(previousRounds.get(i).getP2().equals(Move.D)){
-                    dynamite_vibeCheck++;
-                }
-                if(previousRounds.get(i).getP2().equals(Move.R)){
-                    rock_vibeCheck++;
-                }
-                if(previousRounds.get(i).getP2().equals(Move.P)){
-                    paper_vibeCheck++;
-                }
-                if(previousRounds.get(i).getP2().equals(Move.S)){
-                    scissors_vibeCheck++;
-                }
-            }
+        }
 
-            System.out.println("Phase " + strategyCheckPhase);
+        if(!drawSuspicion) {
+            drawSuspicion = detectIfThrowingDynamiteOnDraw(previousRounds); //Sees if the opponent throws dynamite after a draw.
+        }
 
-            if (rock_vibeCheck == 10){
-                opponentAlwaysThrows = Move.R;
-                counterWith = Move.P;
-                countering = true;
-                System.out.println("Opponent always throws rock.");
-            }
-            else if(scissors_vibeCheck == 10){
-                opponentAlwaysThrows = Move.S;
-                counterWith = Move.R;
-                countering = true;
-                System.out.println("Opponent always throws scissors.");
-            }
-            else if (paper_vibeCheck == 10){
-                opponentAlwaysThrows = Move.P;
-                counterWith = Move.S;
-                countering = true;
-                System.out.println("Opponent always throws paper.");
-            }
-            else if (dynamite_vibeCheck == 10){
-                opponentAlwaysThrows = Move.D;
-                counterWith = Move.W;
-                countering = true;
-                System.out.println("Opponent always throws dynamite.");
+        if(detectBruteForce(previousRounds, 5)){
+            //System.out.println("Countering brute force.");
+            return counters.get(previousRounds.get(previousRounds.size() - 1).getP2()); //Get the most recent move and counter it.
+
+        }
+
+        if(detectIfBeatingPreviousMove(previousRounds, 5, counters)){
+            return counters.get(counters.get(previousRounds.get(previousRounds.size() - 1).getP1())); //Plays the counter to the counter of 0216's previous move.
+        }
+
+        if(drawSuspicion && previousRounds.get(previousRounds.size() - 1).getP1().equals(previousRounds.get(previousRounds.size() - 1).getP2())){
+            //If the previous round was a draw, and 0216 is suspicious that the opponent throws dynamite after a draw, throw a water balloon.
+            if(dynamiteThrownByOpponent < 100){
+                return Move.W; //Throw a water balloon to counter the opponent's dynamite.
             } else {
-                System.out.println("Opponent is random.");
-                opponentAlwaysThrows = null;
-                counterWith = null;
-                countering = false;
+                return moveRandomly(dynamiteThrownByTwoSixteen); //0216 can move randomly, since the opponent has no dynamite left to throw.
             }
+
         }
 
+        return moveRandomly(dynamiteThrownByTwoSixteen);
+    }
 
+    public boolean detectBruteForce(List<Round> previousRounds, int range){
+
+        //Detects if the last 5 moves by the opponent are the same.
+
+        for(int i = previousRounds.size() - range; i != previousRounds.size(); i++){
+            if(!previousRounds.get(i).getP2().equals(previousRounds.get(i-1).getP2())){
+                return false; //If there isn't a patch between i and i-1's move, return false. No repetition.
+            }
+        }
+        return true; //Repetition detected.
+    }
+
+    public Move moveRandomly(int dynamiteThrownByTwoSixteen){
+
+        //Picks a random move from rock-paper-scissors.
 
         List<Move> moveList = new ArrayList<>();
 
-        if(countering){ //Counter a specific move.
-            //System.out.println("Countering " + opponentAlwaysThrows + " with " + counterWith);
-            return counterWith;
-        } else { //Or else act randomly, playing 1 move 10 times in a row.
-
-            moveList.add(Move.R);
-            moveList.add(Move.P);
-            moveList.add(Move.S);
-            if (dynamiteThrownByTwoSixteen < 99){
-                moveList.add(Move.D);
-            }
-
-            if(deceptionPhase == 10){
-                aynRand = new Random();
-                deceptionChoice = aynRand.nextInt(moveList.size() - 1);
-                deceptionPhase = 0;
-            }
+        moveList.add(Move.R);
+        moveList.add(Move.P);
+        moveList.add(Move.S);
+        if(dynamiteThrownByTwoSixteen > 98){
+            moveList.add(Move.D);
         }
 
-        Move moveToPlay = moveList.get(deceptionChoice);
-
-        deceptionPhase ++;
-
-        //System.out.println("Two Sixteen uses: " + moveToPlay);
-
-        if (moveToPlay.equals(Move.D)) { dynamiteThrownByTwoSixteen++; }
-
-        return moveToPlay;
+        Random aynRand = new Random();
+        return moveList.get(aynRand.nextInt(moveList.size()));
     }
 
-    public boolean detectRepeatedMoves(List<Round> previousMoves){
-        if(previousMoves.size() < 10){
-            return false; //Not enough moves to be considered yet.
-        }
-        for(int i = previousMoves.size()-10; i != previousMoves.size(); i++){
-            if(!previousMoves.get(i).getP2().equals(previousMoves.get(i-1).getP2())){
-                return false; //No bombing run detected.
+    public boolean detectIfBeatingPreviousMove(List<Round> previousRounds, int range, HashMap<Move, Move> counters){
+
+        for(int i = previousRounds.size() - range; i != previousRounds.size(); i++){
+
+            //If the opponent's move is a counter to the move 0216 used last round.
+
+            if(!previousRounds.get(i).getP2().equals(counters.get(previousRounds.get(i-1).getP1()))){
+                return false; //Sequence not found during detection.
             }
         }
-        return true; //Repeated moves detected.
+        return true;
+    }
+
+    public boolean detectIfThrowingDynamiteOnDraw(List<Round> previousRounds){
+
+            //Detect if opponent is throwing dynamite on a draw.
+            //System.out.println("Move used 2 turns ago by P1: " + previousRounds.get(previousRounds.size() - 2).getP1());
+            //System.out.println("Move used 2 turns ago by P2: " + previousRounds.get(previousRounds.size() - 2).getP2());
+            //System.out.println("Was it a draw? " + previousRounds.get(previousRounds.size() - 2).getP1().equals(previousRounds.get(previousRounds.size() - 2).getP2()));
+            //System.out.println("Move used 1 turn ago by P2: " + previousRounds.get(previousRounds.size() - 1).getP2());
+            //System.out.println("Was it dynamite? " + previousRounds.get(previousRounds.size() - 1 ).getP2().equals(Move.D));
+            return previousRounds.get(previousRounds.size()-2).getP1().equals(previousRounds.get(previousRounds.size()-2).getP2()) && previousRounds.get(previousRounds.size()-1).getP2().equals(Move.D);
+
     }
 
 }

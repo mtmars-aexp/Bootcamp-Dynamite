@@ -7,7 +7,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="855644b9-333f-4662-8592-9ec97859d241" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/training/dynamite/MyBot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/training/dynamite/MyBot.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
@@ -26,10 +25,14 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/training/dynamite/MyBot.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="329">
-              <caret line="29" column="45" selection-start-line="29" selection-start-column="45" selection-end-line="29" selection-end-column="45" />
+            <state relative-caret-position="-96">
+              <caret line="41" lean-forward="true" selection-start-line="41" selection-end-line="41" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="method#detectBruteForce#0;class#MyBot#0" />
+                <element signature="method#moveRandomly#0;class#MyBot#0" />
+                <element signature="method#detectIfBeatingPreviousMove#0;class#MyBot#0" />
+                <element signature="method#detectIfThrowingDynamiteOnDraw#0;class#MyBot#0" />
               </folding>
             </state>
           </provider>
@@ -133,7 +136,10 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>Opponent threw: D</find>
+      <find>dynamiteondraw</find>
       <find>DynamiteFirst</find>
+      <find>dynamitefirst</find>
+      <find>LOSE</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -282,12 +288,12 @@
       <option name="presentableId" value="Default" />
       <updated>1548267251649</updated>
       <workItem from="1548267253231" duration="7209000" />
-      <workItem from="1570180353864" duration="10012000" />
+      <workItem from="1570180353864" duration="13933000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="17221000" />
+    <option name="totallyTimeSpent" value="21142000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="1027" extended-state="6" />
@@ -403,10 +409,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/training/dynamite/MyBot.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="329">
-          <caret line="29" column="45" selection-start-line="29" selection-start-column="45" selection-end-line="29" selection-end-column="45" />
+        <state relative-caret-position="-96">
+          <caret line="41" lean-forward="true" selection-start-line="41" selection-end-line="41" />
           <folding>
             <element signature="imports" expanded="true" />
+            <element signature="method#detectBruteForce#0;class#MyBot#0" />
+            <element signature="method#moveRandomly#0;class#MyBot#0" />
+            <element signature="method#detectIfBeatingPreviousMove#0;class#MyBot#0" />
+            <element signature="method#detectIfThrowingDynamiteOnDraw#0;class#MyBot#0" />
           </folding>
         </state>
       </provider>
